@@ -12,9 +12,11 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Data
@@ -23,6 +25,8 @@ import lombok.ToString;
 @Entity
 @Table(name="clientes")
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Cliente implements Serializable{
 
 	@EqualsAndHashCode.Include
