@@ -2,45 +2,70 @@ package com.rivero.springboot.backend.apirest.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.rivero.springboot.backend.apirest.models.dao.IClienteDao;
+import com.rivero.springboot.backend.apirest.SpringBootBackendApirestApplication;
 import com.rivero.springboot.backend.apirest.models.entity.Cliente;
-import com.rivero.springboot.backend.apirest.models.service.impl.ClienteServiceImpl;
+import com.rivero.springboot.backend.apirest.models.service.IClienteService;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@SpringBootTest(classes = SpringBootBackendApirestApplication.class)
+@Transactional
 public class ClienteServiceTest {
 	
-	@Mock
-	private IClienteDao dao;
+	@Autowired
+	private IClienteService service;
 	
-	@InjectMocks
-	private ClienteServiceImpl clienteService;
-	
-	@BeforeEach
-	private void setup() {
-		clienteService = new ClienteServiceImpl(dao);
+	@BeforeAll
+	private static void setup() {
+		
 	}
 	
 	@Test
 	public void testFindAllSuccess() {
-		Cliente cliente = Cliente.builder().id(1L).nombre("test").apellido("test").email("test").createdAt(new Date()).build();
-		List<Cliente> clientes = new ArrayList<Cliente>();
-		clientes.add(cliente);
-		Mockito.when(dao.findAll()).thenReturn(clientes);
-		List<Cliente> result = clienteService.findAll();
+		List<Cliente> result = service.findAll();
 		assertThat(result).isNotEmpty();
-		assertThat(result.get(0).getId()).isEqualTo(cliente.getId());
+		assertThat(result.size()).isEqualTo(50);
+	}
+	
+	@Test
+	public void testFindById() {
+		Cliente result = service.findById(1L);
+		assertThat(result).isNotNull();
+		assertThat(result.getId()).isEqualTo(1L);
+	}
+	
+	@Test
+	public void testCreateCliente() {
+		Cliente cliente = Cliente.builder().apellido("test").nombre("test").email("test@test.test").build();
+		Cliente result = service.save(cliente);
+		assertThat(result).isNotNull();
+		assertThat(result.getApellido()).isEqualTo(cliente.getApellido());
+	}
+	
+	@Test
+	public void testUpdateCliente() {
+		Cliente cliente = Cliente.builder().apellido("test").nombre("test").email("test@test.test").build();
+		Cliente resultSave = service.save(cliente);
+		resultSave.setApellido("update");
+		Cliente resultUpdate = service.update(resultSave, resultSave.getId());
+		assertThat(resultUpdate).isNotNull();
+		assertThat(resultUpdate.getApellido()).isEqualTo(resultSave.getApellido());
+	}
+	
+	@Test
+	public void testDelete() {
+		service.delete(1L);
+		Cliente result = service.findById(1L);
+		assertThat(result).isNull();
 	}
 
 }
